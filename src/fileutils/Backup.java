@@ -50,8 +50,8 @@ public class Backup {
                 if (Files.isDirectory(source)) {
                     Files.createDirectories(target);
                 } else {
+                    progressBar.draw(1);
                     Files.copy(source, target);
-                    progressBar.draw(1, target.toString());
                 }
             } catch (IOException e) {
                 exceptions++;

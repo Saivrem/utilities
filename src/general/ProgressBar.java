@@ -46,7 +46,7 @@ public class ProgressBar {
      *
      * @param delta change in value;
      */
-    public void draw(long delta, String name) {
+    public void draw(long delta) {
 
         currentValue += delta;
 
@@ -58,9 +58,9 @@ public class ProgressBar {
             }
 
             if (currentPercent == 100) {
-                System.out.printf("\r[====================>] %d%%, %s\nDone\n", currentPercent, name);
+                System.out.printf("\r[====================>] %d%%\n\n", currentPercent);
             } else {
-                System.out.printf("\r[%-" + 21 + "s] %d%%, %s", progress + ">", currentPercent, name);
+                System.out.printf("\r[%-" + 21 + "s] %d%%", progress + ">", currentPercent);
             }
         }
     }
