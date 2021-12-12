@@ -1,69 +1,70 @@
 package fileutils;
 
-import java.io.File;
+import general.ProgressBar;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import static general.MessageUtils.deletedMessage;
+import static fileutils.FileUtils.deleteFolder;
+import static fileutils.FileUtils.resolveDestinationPath;
 import static general.MessageUtils.message;
 
 public class Backup {
 
     private final Path origin, destination;
-    private Path existingBackup, tmpOldBackup;
+    private Path targetBackupDirectory, tmpOldBackupDirectory;
+    int exceptions = 0;
 
     public Backup(String origin, String destination) {
         this.origin = Paths.get(origin);
         this.destination = Paths.get(destination);
     }
 
-    public void start() throws IOException {
+    public void run() throws IOException {
+
+        BackupFileVisitor visitor = new BackupFileVisitor();
+        Files.walkFileTree(origin, visitor);
+
+        ProgressBar progressBar = new ProgressBar(visitor.getCount());
 
         if (!Files.exists(destination)) {
             Files.createDirectories(destination);
         }
 
-        if (destinationContainsSource()) {
-            existingBackup = Paths.get(destination.toString(), origin.getFileName().toString());
-            tmpOldBackup = Paths.get(destination.toString(), "oldBackup");
-            deleteIfExists(tmpOldBackup);
+        targetBackupDirectory = resolveDestinationPath(destination, origin.getFileName());
+
+        if (Files.exists(targetBackupDirectory)) {
+            tmpOldBackupDirectory = resolveDestinationPath(destination, "oldBackup");
+            deleteFolder(tmpOldBackupDirectory);
             message("Moving old backup to tmp location");
-            Files.move(existingBackup, tmpOldBackup);
+            Files.move(targetBackupDirectory, tmpOldBackupDirectory);
+            message("Moved");
         }
+        Files.createDirectories(targetBackupDirectory);
 
-        BackupFileVisitor backupFileVisitor = new BackupFileVisitor(origin, destination);
-
-        try {
-            Files.walkFileTree(origin, backupFileVisitor);
-        } catch (IOException e) {
-            deleteIfExists(existingBackup);
-            Files.move(tmpOldBackup, existingBackup);
-            message("New backup failed, old one restored");
-            e.printStackTrace();
-        }
-        deleteIfExists(tmpOldBackup);
-    }
-
-    private boolean destinationContainsSource() throws IOException {
-        return Files.list(destination).anyMatch(element -> element.getFileName().equals(origin.getFileName()));
-    }
-
-    private void deleteIfExists(Path path) {
-        File dir = path.toFile();
-        if (!dir.exists()) {
-            return;
-        }
-        for (String str : dir.list()) {
-            File toDelete = new File(dir.getPath(), str);
-            if (toDelete.isDirectory()) {
-                deleteIfExists(toDelete.toPath());
+        Files.walk(origin).forEach(source -> {
+            Path target = resolveDestinationPath(targetBackupDirectory, origin.relativize(source));
+            try {
+                if (Files.isDirectory(source)) {
+                    Files.createDirectories(target);
+                } else {
+                    Files.copy(source, target);
+                    progressBar.draw(1, target.toString());
+                }
+            } catch (IOException e) {
+                exceptions++;
+                e.printStackTrace();
             }
-            toDelete.delete();
-            deletedMessage(toDelete.toPath());
+        });
+
+        if (exceptions > 0 && tmpOldBackupDirectory.toFile().exists()) {
+            message("New backup failed, old one restored");
+            deleteFolder(targetBackupDirectory);
+            Files.move(tmpOldBackupDirectory, targetBackupDirectory);
+        } else if (Files.exists(tmpOldBackupDirectory)) {
+            deleteFolder(tmpOldBackupDirectory);
         }
-        dir.delete();
-        deletedMessage(dir.toPath());
     }
 }

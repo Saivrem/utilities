@@ -42,7 +42,7 @@ public class Main {
             String origin = args[1];
             String destination = args[2];
             Backup backup = new Backup(origin, destination);
-            backup.start();
+            backup.run();
         } catch (ArrayIndexOutOfBoundsException e) {
             message(WRONG_ARGS);
             exitErr();
