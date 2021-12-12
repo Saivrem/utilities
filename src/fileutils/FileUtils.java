@@ -4,8 +4,6 @@ import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import static general.MessageUtils.deletedMessage;
-
 public class FileUtils {
 
     public static Path resolveDestinationPath(Path root, Path relative) {
@@ -27,10 +25,8 @@ public class FileUtils {
                 deleteFolder(toDelete.toPath());
             }
             toDelete.delete();
-            deletedMessage(toDelete.toPath());
         }
         dir.delete();
-        deletedMessage(dir.toPath());
     }
 
 }
