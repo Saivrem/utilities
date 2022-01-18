@@ -29,10 +29,6 @@ public class Backup {
 
         ProgressBar progressBar = new ProgressBar(visitor.getCount());
 
-        if (!Files.exists(destination)) {
-            Files.createDirectories(destination);
-        }
-
         targetBackupDirectory = resolveDestinationPath(destination, origin.getFileName());
 
         if (Files.exists(targetBackupDirectory)) {
@@ -44,26 +40,23 @@ public class Backup {
         }
         Files.createDirectories(targetBackupDirectory);
 
-        Files.walk(origin).forEach(source -> {
-            Path target = resolveDestinationPath(targetBackupDirectory, origin.relativize(source));
+        for (Path path : visitor.getFiles()) {
+            Path target = resolveDestinationPath(targetBackupDirectory, origin.relativize(path));
             try {
-                if (Files.isDirectory(source)) {
-                    Files.createDirectories(target);
-                } else {
-                    progressBar.draw(1);
-                    Files.copy(source, target);
-                }
+                Files.createDirectories(target.getParent());
+                progressBar.draw(1);
+                Files.copy(path, target);
             } catch (IOException e) {
                 exceptions++;
                 e.printStackTrace();
             }
-        });
+        }
 
         if (exceptions > 0 && tmpOldBackupDirectory.toFile().exists()) {
             message("New backup failed, old one restored");
             deleteFolder(targetBackupDirectory);
             Files.move(tmpOldBackupDirectory, targetBackupDirectory);
-        } else if (Files.exists(tmpOldBackupDirectory)) {
+        } else if (tmpOldBackupDirectory != null && Files.exists(tmpOldBackupDirectory)) {
             deleteFolder(tmpOldBackupDirectory);
         }
     }
