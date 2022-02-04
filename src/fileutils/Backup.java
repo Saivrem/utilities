@@ -14,7 +14,7 @@ import static general.MessageUtils.message;
 public class Backup {
 
     private final Path origin, destination;
-    private Path targetBackupDirectory, tmpOldBackupDirectory;
+    private Path tmpOldBackupDirectory;
     int exceptions = 0;
 
     public Backup(String origin, String destination) {
@@ -29,7 +29,7 @@ public class Backup {
 
         ProgressBar progressBar = new ProgressBar(visitor.getCount());
 
-        targetBackupDirectory = resolveDestinationPath(destination, origin.getFileName());
+        Path targetBackupDirectory = resolveDestinationPath(destination, origin.getFileName());
 
         if (Files.exists(targetBackupDirectory)) {
             tmpOldBackupDirectory = resolveDestinationPath(destination, "oldBackup");
