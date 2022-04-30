@@ -10,20 +10,21 @@ public class MessageUtils {
     public final static String NO_MATCHES = "No matched functions for your input";
     public final static String FAILED = "Task failed";
     public final static String SUCCESS = "Task succeeded";
-    public static final String MANUAL = ""
-            + "****************************************************************************\n"
-            + "**      This is a simple utility program, functions available so far:     **\n"
-            + "****************************************************************************\n"
-            + "**      -b                                                                **\n"
-            + "**      --backup                                                          **\n"
-            + "**          backups all contents of folder A to folder B                  **\n"
-            + "**          example:                                                      **\n"
-            + "**              -b path/to/folderA path/to/folderB                        **\n"
-            + "****************************************************************************\n"
-            + "**      -h                                                                **\n"
-            + "**      --help                                                            **\n"
-            + "**          call this manual                                              **\n"
-            + "****************************************************************************\n";
+    public static final String MANUAL = """
+            ****************************************************************************
+            **      This is a simple utility program, functions available so far:     **
+            ****************************************************************************
+            **      -b                                                                **
+            **      --backup                                                          **
+            **          backups all contents of folder A to folder B                  **
+            **          example:                                                      **
+            **              -b path/to/folderA path/to/folderB                        **
+            ****************************************************************************
+            **      -h                                                                **
+            **      --help                                                            **
+            **          call this manual                                              **
+            ****************************************************************************
+            """;
 
     public static void message(String pattern, String message) {
         System.out.printf(pattern, message);
